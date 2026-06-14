@@ -135,14 +135,14 @@ const dbClient = new SuiGrpcClient({ network, baseUrl })
 try {
   let baseOut, quoteOut, deepOut;
   if (isBaseIn) {
-    [baseOut, quoteOut, deepOut] = dbClient.deepbook.swapExactBaseForQuote({
+    [baseOut, quoteOut, deepOut] = dbClient.deepBook.swapExactBaseForQuote({
       poolKey,
       amount: amountIn,
       deepAmount: 0,
       minOut,
     })(tx);
   } else {
-    [baseOut, quoteOut, deepOut] = dbClient.deepbook.swapExactQuoteForBase({
+    [baseOut, quoteOut, deepOut] = dbClient.deepBook.swapExactQuoteForBase({
       poolKey,
       amount: amountIn,
       deepAmount: 0,
