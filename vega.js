@@ -14,7 +14,7 @@ Object.assign(STATE, {
   lev:         20,
   side:        'buy',
   orderType:   'market',
-  tf:          '60',
+  tf:          '45',
   connected:   false,
   walletAddr:  null,
   balance:     null,
