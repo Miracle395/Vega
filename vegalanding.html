@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Vega | The Execution Layer for DeepBook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --mint:  #d8f8d8;
+      --ink:   #0a0a0a;
+      --ink-2: #1a1a1a;
+      --muted: rgba(10,10,10,0.42);
+      --bdr:   rgba(10,10,10,0.11);
+      --font:  'Space Grotesk', system-ui, sans-serif;
+      --font-b:'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--mint);
+      color: var(--ink);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ─────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 14px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      width: calc(100% - 32px);
+      max-width: 760px;
+    }
+
+    .nav-pill {
+      background: var(--ink);
+      border-radius: 100px;
+      padding: 10px 10px 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      color: #fff;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    .nav-links { display: none; align-items: center; gap: 28px; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px; font-weight: 400;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #fff; }
+
+    .nav-links .btn-launch {
+      background: #fff; color: var(--ink);
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 9px 20px; border-radius: 100px;
+      transition: opacity 0.15s;
+    }
+    .nav-links .btn-launch:hover { opacity: 0.85; }
+
+    .nav-hamburger {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.1);
+      border: none; border-radius: 50%; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+    }
+    .nav-hamburger span {
+      display: block; width: 14px; height: 1.5px;
+      background: #fff; border-radius: 2px;
+    }
+
+    /* ── HERO ────────────────────────────── */
+    .hero {
+      min-height: 100svh;
+      background: var(--mint);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    /* Geometric stripe block — upper right — signature element */
+    .hero-stripes {
+      position: absolute;
+      top: 0; right: 0;
+      width: min(56vw, 440px);
+      height: 62%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .stripes-wrap {
+      display: flex;
+      width: 100%; height: 100%;
+      position: relative;
+    }
+
+    .s { flex: 1; background: var(--ink); }
+    .g { flex: 0.55; }
+
+    .arc-1 {
+      position: absolute;
+      bottom: -1px; left: -1px;
+      width: 66%; height: 76%;
+      border-top-right-radius: 100%;
+      background: var(--mint);
+    }
+    .arc-2 {
+      position: absolute;
+      bottom: -1px; right: 34%;
+      width: 46%; height: 56%;
+      border-top-right-radius: 100%;
+      background: var(--mint);
+    }
+
+    /* Hero text bottom-left */
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 28px 52px;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 20px; height: 1px;
+      background: var(--muted);
+    }
+
+    .hero-headline {
+      font-size: clamp(56px, 14vw, 100px);
+      font-weight: 300;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 32px;
+    }
+    .hero-headline strong { font-weight: 700; display: block; }
+
+    .hero-cta-row {
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 44px;
+    }
+
+    .btn-ghost-ink {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--ink);
+      border-bottom: 1.5px solid var(--ink);
+      padding-bottom: 3px;
+      transition: opacity 0.15s;
+    }
+    .btn-ghost-ink:hover { opacity: 0.5; }
+
+    .hero-caption {
+      font-family: var(--font-b);
+      font-size: 14px; line-height: 1.65;
+      color: var(--muted);
+      max-width: 300px;
+    }
+
+    /* Partners ticker */
+    .hero-partners {
+      border-top: 1px solid var(--bdr);
+      padding: 18px 28px 0;
+      overflow: hidden;
+      position: relative; z-index: 2;
+    }
+
+    .partners-label {
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      display: block; margin-bottom: 10px;
+    }
+
+    .partners-track {
+      display: flex; gap: 24px;
+      align-items: center; white-space: nowrap;
+      animation: scrolltrack 20s linear infinite;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 18px;
+    }
+    .partners-track span { flex-shrink: 0; }
+
+    @keyframes scrolltrack {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── STATS ───────────────────────────── */
+    .stats { background: var(--ink); padding: 1px; }
+
+    .stats-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .stat-cell {
+      background: var(--ink);
+      padding: 36px 28px;
+    }
+
+    .stat-val {
+      font-size: clamp(38px, 10vw, 64px);
+      font-weight: 700; letter-spacing: -0.035em;
+      color: #fff; line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 11px; font-weight: 400;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+    }
+
+    /* ── SECTIONS SHARED ─────────────────── */
+    .section-inner {
+      max-width: 1100px; margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 36px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--bdr);
+    }
+
+    /* ── HOW IT WORKS ────────────────────── */
+    .how {
+      padding: 96px 28px;
+      border-bottom: 1px solid var(--bdr);
+    }
+
+    .how-headline {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 300; letter-spacing: -0.02em;
+      line-height: 1.15; color: var(--ink);
+      margin-bottom: 52px;
+    }
+    .how-headline strong { font-weight: 700; }
+
+    .steps { display: flex; flex-direction: column; }
+
+    .step {
+      display: flex; gap: 20px;
+      padding: 28px 0;
+      border-top: 1px solid var(--bdr);
+      align-items: flex-start;
+    }
+    .step:last-child { border-bottom: 1px solid var(--bdr); }
+
+    .step-num {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; color: var(--muted);
+      min-width: 32px; padding-top: 3px;
+    }
+
+    .step-content h3 {
+      font-size: 17px; font-weight: 600;
+      letter-spacing: -0.01em; color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .step-content p {
+      font-family: var(--font-b);
+      font-size: 14px; line-height: 1.65; color: var(--muted);
+    }
+
+    /* ── FEATURES ────────────────────────── */
+    .features {
+      padding: 96px 28px;
+      border-bottom: 1px solid var(--bdr);
+    }
+
+    .features-headline {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 300; letter-spacing: -0.02em;
+      line-height: 1.15; color: var(--ink);
+      margin-bottom: 52px;
+    }
+    .features-headline strong { font-weight: 700; }
+
+    .feature-row {
+      display: flex; flex-direction: column;
+      border-top: 1px solid var(--bdr);
+    }
+    .feature-row:last-child .feature-item:last-child {
+      border-bottom: 1px solid var(--bdr);
+    }
+
+    .feature-item { padding: 28px 0; border-bottom: 1px solid var(--bdr); }
+
+    .feature-tag {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .feature-item h3 {
+      font-size: 18px; font-weight: 600;
+      letter-spacing: -0.01em; color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .feature-item p {
+      font-family: var(--font-b);
+      font-size: 14px; line-height: 1.65; color: var(--muted);
+    }
+
+    /* ── BUILT ON ────────────────────────── */
+    .built-on { background: var(--ink); padding: 96px 28px; }
+
+    .built-on .section-label { color: rgba(255,255,255,0.28); }
+    .built-on .section-label::after { background: rgba(255,255,255,0.08); }
+
+    .built-on-headline {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 300; letter-spacing: -0.02em;
+      line-height: 1.2; color: #fff;
+      margin-bottom: 20px;
+    }
+    .built-on-headline strong { font-weight: 700; }
+
+    .built-on-body {
+      font-family: var(--font-b);
+      font-size: 15px; line-height: 1.7;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 36px; max-width: 560px;
+    }
+
+    .btn-white {
+      display: inline-flex; align-items: center;
+      background: #fff; color: var(--ink);
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 13px 28px; border-radius: 100px;
+      transition: opacity 0.15s; margin-bottom: 56px;
+    }
+    .btn-white:hover { opacity: 0.88; }
+
+    .built-on-badges {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .badge { background: var(--ink-2); padding: 24px 20px; }
+
+    .badge-label {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); margin-bottom: 6px;
+    }
+    .badge-val {
+      font-size: 15px; font-weight: 600;
+      color: #fff; letter-spacing: -0.01em;
+    }
+
+    /* ── FAQ ─────────────────────────────── */
+    .faq {
+      padding: 96px 28px;
+      border-bottom: 1px solid var(--bdr);
+    }
+
+    .faq-headline {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 300; letter-spacing: -0.02em;
+      line-height: 1.15; color: var(--ink);
+      margin-bottom: 48px;
+    }
+    .faq-headline strong { font-weight: 700; }
+
+    .faq-list { display: flex; flex-direction: column; }
+    .faq-item { border-top: 1px solid var(--bdr); }
+    .faq-item:last-child { border-bottom: 1px solid var(--bdr); }
+
+    .faq-q {
+      width: 100%;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 16px;
+      padding: 22px 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--ink); font-family: var(--font);
+      font-size: 15px; font-weight: 600;
+      text-align: left; letter-spacing: -0.01em;
+    }
+
+    .faq-q-left { display: flex; align-items: center; gap: 20px; }
+    .faq-q-num {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; color: var(--muted);
+      min-width: 28px;
+    }
+
+    .faq-icon {
+      flex-shrink: 0; color: var(--muted);
+      transition: transform 0.25s, color 0.25s;
+    }
+    .faq-q[aria-expanded="true"] .faq-icon {
+      transform: rotate(45deg); color: var(--ink);
+    }
+
+    .faq-a {
+      font-family: var(--font-b);
+      font-size: 14px; line-height: 1.7; color: var(--muted);
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding-left: 48px;
+    }
+    .faq-a.open { max-height: 200px; padding: 0 0 24px 48px; }
+
+    /* ── CTA ─────────────────────────────── */
+    .cta {
+      padding: 96px 28px;
+      background: var(--mint);
+      overflow: hidden; position: relative;
+    }
+
+    .cta-stripes {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: min(42vw, 280px); height: 55%;
+      display: flex; overflow: hidden;
+      pointer-events: none; opacity: 0.15;
+    }
+    .cs { flex: 1; background: var(--ink); }
+    .cg { flex: 0.55; }
+
+    .cta-inner {
+      max-width: 1100px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+
+    .cta-headline {
+      font-size: clamp(40px, 10vw, 76px);
+      font-weight: 300; letter-spacing: -0.03em;
+      line-height: 1.0; color: var(--ink);
+      margin-bottom: 32px;
+    }
+    .cta-headline strong { font-weight: 700; display: block; }
+
+    .btn-ink {
+      display: inline-flex; align-items: center;
+      background: var(--ink); color: #fff;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 13px 28px; border-radius: 100px;
+      transition: opacity 0.15s; margin-bottom: 14px;
+    }
+    .btn-ink:hover { opacity: 0.82; }
+
+    .cta-note {
+      font-size: 12px; color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── FOOTER ──────────────────────────── */
+    .footer { background: var(--ink); padding: 56px 28px 32px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; }
+
+    .footer-top {
+      display: flex; flex-direction: column;
+      gap: 40px; margin-bottom: 40px;
+    }
+
+    .footer-logo {
+      display: flex; align-items: center; gap: 8px;
+      color: #fff;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .footer-tagline {
+      font-family: var(--font-b);
+      font-size: 13px; color: rgba(255,255,255,0.32);
+      line-height: 1.6; margin-bottom: 20px;
+    }
+
+    .footer-social { display: flex; gap: 8px; }
+    .social-btn {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.38);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 5px 10px; border-radius: 4px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .social-btn:hover { color: #fff; border-color: rgba(255,255,255,0.38); }
+
+    .footer-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .footer-col { display: flex; flex-direction: column; gap: 10px; }
+
+    .footer-col-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.22); margin-bottom: 4px;
+    }
+
+    .footer-col a {
+      font-family: var(--font-b);
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      display: flex; flex-direction: column; gap: 6px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-size: 11px; color: rgba(255,255,255,0.22);
+      letter-spacing: 0.04em;
+    }
+
+    .footer-version {
+      color: rgba(255,255,255,0.38);
+      font-weight: 600; letter-spacing: 0.08em;
+    }
+
+    /* ── SCROLL PROGRESS ─────────────────── */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0;
+      height: 2px; width: 0%;
+      background: var(--ink); z-index: 9999;
+      transition: width 0.08s linear;
+    }
+
+    /* ── REVEAL ──────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── WORD REVEAL — hero headline ─────── */
+    .hero-headline .wr {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+    .hero-headline .wr-inner {
+      display: inline-block;
+      transform: translateY(110%);
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-headline .wr-inner.in { transform: translateY(0); }
+
+    /* ── HERO SCROLL FADE ────────────────── */
+    .hero-content {
+      will-change: opacity, transform;
+    }
+
+    /* ── CTA BUTTON PULSE ────────────────── */
+    .btn-ink {
+      position: relative;
+    }
+    .btn-ink::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 100px;
+      border: 1.5px solid rgba(10,10,10,0.35);
+      opacity: 0;
+      animation: pulse-ring 2.8s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse-ring {
+      0%   { opacity: 0.6; transform: scale(1); }
+      70%  { opacity: 0;   transform: scale(1.1); }
+      100% { opacity: 0;   transform: scale(1.1); }
+    }
+
+    /* ── ODOMETER DIGITS ─────────────────── */
+    .odo-digit {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      height: 1.05em;
+      line-height: 1.05em;
+    }
+    .odo-digit-inner {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .odo-digit-inner span {
+      display: block;
+      height: 1.05em;
+      line-height: 1.05em;
+    }
+
+    /* ── DESKTOP ─────────────────────────── */
+    @media (min-width: 900px) {
+      .nav-links { display: flex; }
+      .nav-hamburger { display: none; }
+
+      .hero-content { padding: 0 60px 72px; }
+      .hero-cta-row { flex-direction: row; align-items: center; gap: 32px; }
+      .hero-caption { max-width: 380px; }
+      .hero-partners { padding-left: 60px; padding-right: 60px; }
+
+      .stats-inner { grid-template-columns: repeat(4, 1fr); }
+      .stats { padding: 1px; }
+
+      .how, .features, .faq, .cta { padding: 120px 60px; }
+      .built-on { padding: 120px 60px; }
+
+      .built-on-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px; align-items: start;
+      }
+
+      .built-on-badges { grid-template-columns: repeat(4, 1fr); }
+      .btn-white { margin-bottom: 0; }
+
+      .feature-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        flex-direction: unset;
+      }
+      .feature-item {
+        border-bottom: 1px solid var(--bdr);
+        border-right: 1px solid var(--bdr);
+        padding: 36px 40px 36px 0;
+      }
+      .feature-item:nth-child(even) {
+        border-right: none;
+        padding-left: 40px; padding-right: 0;
+      }
+      .feature-row:last-child .feature-item {
+        border-bottom: 1px solid var(--bdr);
+      }
+
+      .footer-top {
+        flex-direction: row;
+        justify-content: space-between; align-items: flex-start;
+      }
+      .footer-brand { max-width: 260px; }
+      .footer-bottom {
+        flex-direction: row;
+        justify-content: space-between; align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="scroll-progress"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-pill">
+    <a href="#" class="nav-logo">
+      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+        <path d="M9 0L11.02 6.98L18 9L11.02 11.02L9 18L6.98 11.02L0 9L6.98 6.98L9 0Z" fill="currentColor"/>
+      </svg>
+      Vega
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://vegaxyz.vercel.app" class="btn-launch" target="_blank">Launch App</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+
+  <!-- Stripe geometric block — upper right -->
+  <div class="hero-stripes" aria-hidden="true">
+    <div class="stripes-wrap">
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div><div class="g"></div>
+      <div class="s"></div>
+      <div class="arc-1"></div>
+      <div class="arc-2"></div>
+    </div>
+  </div>
+
+  <!-- Text anchored bottom-left -->
+  <div class="hero-content">
+    <h1 class="hero-headline">
+      <span class="wr"><span class="wr-inner">Trade</span></span><br/>
+      <span class="wr"><span class="wr-inner">with an</span></span><br/>
+      <strong>
+        <span class="wr"><span class="wr-inner">execution</span></span><br/>
+        <span class="wr"><span class="wr-inner">edge.</span></span>
+      </strong>
+    </h1>
+    <div class="hero-cta-row">
+      <a href="https://vegaxyz.vercel.app" class="btn-ghost-ink" target="_blank">Launch App</a>
+      <span class="hero-caption">Execute smarter with DeepBook liquidity, intelligent routing and TWAP orders.</span>
+    </div>
+  </div>
+
+  <!-- Partners ticker -->
+  <div style="
+  border-top: 1px solid rgba(10,10,10,0.11);
+  background: #d8f8d8;
+  padding: 28px 28px 32px;
+  position: relative;
+  z-index: 2;
+">
+
+  <!-- Label -->
+  <p style="
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(10,10,10,0.4);
+    margin: 0 0 20px 0;
+  ">Built with</p>
+
+  <!-- 2-col grid -->
+  <div style="
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  ">
+
+    <!-- Sui Network -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(10,10,10,0.08);
+      border-right: 1px solid rgba(10,10,10,0.08);
+      padding-right: 20px;
+    ">
+      <img
+        src="sui.png"
+        style="width:22px;height:22px;object-fit:contain;flex-shrink:0;"
+      />
+      <span style="
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(10,10,10,0.75);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      ">Sui Network</span>
+    </div>
+
+    <!-- DeepBook -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 0 14px 20px;
+      border-bottom: 1px solid rgba(10,10,10,0.08);
+    ">
+      <img
+  src="https://pbs.twimg.com/profile_images/2052447669600043009/K3q-3AcZ.png"
+  style="width:22px;height:22px;object-fit:contain;flex-shrink:0;border-radius:4px;mix-blend-mode:multiply;"
+/>
+      <span style="
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(10,10,10,0.75);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      ">DeepBook V3</span>
+    </div>
+
+    <!-- Mysten Labs -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(10,10,10,0.08);
+      border-right: 1px solid rgba(10,10,10,0.08);
+      padding-right: 20px;
+    ">
+   <img
+  src="https://pbs.twimg.com/profile_images/1966184709156663298/9uTxkooE.jpg"
+  style="width:22px;height:22px;object-fit:contain;flex-shrink:0;border-radius:4px;mix-blend-mode:multiply;"
+/>
+      <span style="
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(10,10,10,0.75);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      ">Mysten Labs</span>
+    </div>
+
+    <!-- Tatum RPC -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 0 14px 20px;
+      border-bottom: 1px solid rgba(10,10,10,0.08);
+    ">
+<img
+  src="tatum.png"
+  style="width:22px;height:22px;object-fit:contain;flex-shrink:0;border-radius:4px;"
+/>
+      <span style="
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(10,10,10,0.75);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      ">Tatum RPC</span>
+    </div>
+
+  </div>
+</div>
+
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-cell reveal">
+      <div class="stat-val" data-odo="730" data-suffix="M+">730M+</div>
+      <div class="stat-label">Daily Volume on DeepBook</div>
+    </div>
+    <div class="stat-cell reveal">
+      <div class="stat-val" data-odo="26">26</div>
+      <div class="stat-label">Live Trading Markets</div>
+    </div>
+    <div class="stat-cell reveal">
+      <div class="stat-val" data-odo="500" data-suffix="ms">500ms</div>
+      <div class="stat-label">Transaction Finality</div>
+    </div>
+    <div class="stat-cell reveal">
+      <div class="stat-val" data-odo="3">3</div>
+      <div class="stat-label">Order Types Supported</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label" data-scramble="HOW IT WORKS">How it works</div>
+    <h2 class="how-headline">Three steps.<br/><strong>One execution edge.</strong></h2>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num" data-final="01">00</div>
+        <div class="step-content">
+          <h3>Connect your Sui wallet</h3>
+          <p>Link any Sui compatible wallet in one click, no account, no email, your keys, your assets.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num" data-final="02">00</div>
+        <div class="step-content">
+          <h3>Pick a market and order type</h3>
+          <p>Choose from the available pairs. Execute at market, set a limit or schedule a TWAP to work your position quietly.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num" data-final="03">00</div>
+        <div class="step-content">
+          <h3>Vega routes the best fill</h3>
+          <p>Every order routes through the optimal DeepBook path. Lower slippage, better fills, onchain verifiable. Every time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-inner">
+    <div class="section-label" data-scramble="FEATURES">Features</div>
+    <h2 class="features-headline">Everything you need<br/><strong>to trade seriously.</strong></h2>
+    <div>
+      <div class="feature-row">
+        <div class="feature-item reveal">
+          <div class="feature-tag">Execution</div>
+          <h3>Best Route Swaps</h3>
+          <p>Every swap routes through the optimal DeepBook path. Lower slippage, better fills, onchain verifiable.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-tag">Orders</div>
+          <h3>Limit &amp; Market Orders</h3>
+          <p>Full orderbook depth with instant bid/ask. Place limit orders at your price. Execute immediately at market.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-item reveal">
+          <div class="feature-tag">Strategy</div>
+          <h3>TWAP Execution</h3>
+          <p>Break large orders into time spaced slices. Work your position without moving the market against yourself.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-tag">Analytics</div>
+          <h3>TradingView Charts</h3>
+          <p>Professional grade candlestick charts embedded directly. Multi timeframe, indicators, Binance price feed.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-item reveal">
+          <div class="feature-tag">Portfolio</div>
+          <h3>Portfolio Tracking</h3>
+          <p>Total balance, available, swapped, all in one view. Full swap history and open order management.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-tag">Custody</div>
+          <h3>Non-Custodial</h3>
+          <p>Vega never holds your funds. Every trade executes directly from your wallet. You sign every transaction.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT ON -->
+<section class="built-on">
+  <div class="section-inner">
+    <div class="section-label" data-scramble="INFRASTRUCTURE">Infrastructure</div>
+    <div class="built-on-grid">
+      <div>
+        <h2 class="built-on-headline">Built on the fastest<br/><strong>on-chain orderbook.</strong></h2>
+        <p class="built-on-body">Vega runs entirely on DeepBook V3 : Sui's native central limit order book protocol, no synthetic liquidity, no routed aggregators, it's pure onchain execution with sub-second finality.</p>
+        <a href="https://vegaxyz.vercel.app" class="btn-white" target="_blank">Launch App</a>
+      </div>
+      <div>
+        <div style="display:flex; flex-direction:column; gap:0; border-top: 1px solid rgba(255,255,255,0.08);">
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; padding: 32px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <span style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.28);font-family:'Space Grotesk',sans-serif;">Powered by</span>
+    <span style="font-size:16px;font-weight:700;letter-spacing:-0.02em;color:#fff;font-family:'Space Grotesk',sans-serif;">DeepBook V3</span>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; padding: 32px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <span style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.28);font-family:'Space Grotesk',sans-serif;">Network</span>
+    <span style="font-size:16px;font-weight:700;letter-spacing:-0.02em;color:#fff;font-family:'Space Grotesk',sans-serif;">Sui Mainnet</span>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; padding: 32px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <span style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.28);font-family:'Space Grotesk',sans-serif;">Finality</span>
+    <span style="font-size:16px;font-weight:700;letter-spacing:-0.02em;color:#fff;font-family:'Space Grotesk',sans-serif;">&lt; 500ms</span>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; padding: 32px 0;">
+    <span style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.28);font-family:'Space Grotesk',sans-serif;">Order Types</span>
+    <span style="font-size:16px;font-weight:700;letter-spacing:-0.02em;color:#fff;font-family:'Space Grotesk',sans-serif;">Market · Limit · TWAP</span>
+  </div>
+
+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-inner">
+    <div class="section-label" data-scramble="FAQ">FAQ</div>
+    <h2 class="faq-headline">Questions?<br/><strong>Answers.</strong></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">01</span>What is Vega?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Vega is an intelligent execution terminal built on DeepBook V3 on the Sui network. Instant orderbook depth, best route spot execution, limit orders and TWAP, all in one professional interface.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">02</span>What is DeepBook?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">DeepBook is Sui's native central limit order book protocol, the onchain infrastructure that powers real orderbook trading on Sui. Vega uses DeepBook V3 exclusively: no synthetic liquidity, no third party aggregators.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">03</span>What is TWAP and why does it matter?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">TWAP (Time Weighted Average Price) breaks a large order into smaller time spaced slices. Execute large positions without moving the market against yourself; a tool previously only available to institutional traders.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">04</span>Is Vega non-custodial?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Yes. Vega never holds your funds. Every trade executes directly from your wallet through DeepBook smart contracts on Sui. You sign every transaction and maintain full custody at all times.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">05</span>What wallets are supported?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Any Sui compatible wallet including Sui Wallet, Slush, Phantom, Slipstream and any wallet that supports the Sui wallet standard.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <div class="faq-q-left"><span class="faq-q-num">06</span>Is there a fee to use Vega?</div>
+          <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Vega charges no platform fee. You only pay standard DeepBook protocol fees and Sui network gas, among the lowest in any onchain trading environment.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-stripes" aria-hidden="true">
+    <div class="cs"></div><div class="cg"></div>
+    <div class="cs"></div><div class="cg"></div>
+    <div class="cs"></div><div class="cg"></div>
+    <div class="cs"></div><div class="cg"></div>
+    <div class="cs"></div>
+  </div>
+  <div class="cta-inner">
+    <h2 class="cta-headline">Start trading<br/><strong>on Vega.</strong></h2>
+    <div>
+      <a href="https://vegaxyz.vercel.app" class="btn-ink" target="_blank">Launch App</a>
+    </div>
+    <div class="cta-note">No account. No KYC. Non-custodial.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
+            <path d="M9 0L11.02 6.98L18 9L11.02 11.02L9 18L6.98 11.02L0 9L6.98 6.98L9 0Z" fill="#fff"/>
+          </svg>
+          Vega
+        </div>
+        <p class="footer-tagline">Execute smarter with DeepBook liquidity </br>intelligent routing and TWAP orders.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn">[X]</a>
+          <a href="#" class="social-btn">[GH]</a>
+          <a href="#" class="social-btn">[DC]</a>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-label">Product</div>
+          <a href="https://vegaxyz.vercel.app">Launch App</a>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-label">Technology</div>
+          <a href="https://deepbook.tech" target="_blank">DeepBook V3</a>
+          <a href="https://sui.io" target="_blank">Sui Network</a>
+          <a href="https://mystenlabs.com" target="_blank">Mysten Labs</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-label">Hackathon</div>
+          <a href="#">Sui Overflow 2026</a>
+          <a href="#">Built on Sui</a>
+          <a href="#">DeFi Track</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span> All rights reserved © 2026 Vega. Built for Sui Overflow.</span>
+      
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+
+  /* ── SCROLL PROGRESS ───────────────────── */
+  const bar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+    if (bar) bar.style.width = pct + '%';
+  }, { passive: true });
+
+  /* ── HERO SCROLL FADE + SCALE ──────────── */
+  const heroContent = document.querySelector('.hero-content');
+  const heroEl = document.querySelector('.hero');
+  window.addEventListener('scroll', () => {
+    if (!heroContent || !heroEl) return;
+    const progress = Math.min(window.scrollY / (heroEl.offsetHeight * 0.6), 1);
+    heroContent.style.opacity = 1 - progress * 1.1;
+    heroContent.style.transform = `translateY(${window.scrollY * 0.12}px)`;
+  }, { passive: true });
+
+  /* ── WORD REVEAL — hero headline ───────── */
+  function fireWordReveal() {
+    document.querySelectorAll('.hero-headline .wr-inner').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), 80 + i * 110);
+    });
+  }
+  window.addEventListener('load', () => setTimeout(fireWordReveal, 60));
+
+  /* ── SCRAMBLE — section labels ─────────── */
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·—';
+  function scramble(el) {
+    const target = el.dataset.scramble;
+    if (!target) return;
+    let iter = 0;
+    const interval = setInterval(() => {
+      el.textContent = target.split('').map((ch, idx) => {
+        if (ch === ' ') return ' ';
+        if (idx < iter) return target[idx];
+        return CHARS[Math.floor(Math.random() * CHARS.length)];
+      }).join('');
+      iter += 0.6;
+      if (iter >= target.length) {
+        clearInterval(interval);
+        el.textContent = target;
+      }
+    }, 32);
+  }
+
+  const scrambleObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        scramble(e.target);
+        scrambleObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-scramble]').forEach(el => scrambleObs.observe(el));
+
+  /* ── REVEAL ON SCROLL ──────────────────── */
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const siblings = Array.from(e.target.parentElement.children);
+        const idx = siblings.indexOf(e.target);
+        setTimeout(() => e.target.classList.add('visible'), idx * 80);
+        ro.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  /* ── ODOMETER FLIP — stats ─────────────── */
+  function buildOdometer(el) {
+    const target = parseInt(el.dataset.odo, 10);
+    const suffix = el.dataset.suffix || '';
+    const digits = String(target).split('');
+    el.innerHTML = '';
+    el.style.display = 'inline-flex';
+    el.style.alignItems = 'flex-end';
+
+    digits.forEach((d, i) => {
+      const wrap = document.createElement('span');
+      wrap.className = 'odo-digit';
+      const inner = document.createElement('span');
+      inner.className = 'odo-digit-inner';
+      for (let n = 0; n <= 9; n++) {
+        const s = document.createElement('span');
+        s.textContent = n;
+        inner.appendChild(s);
+      }
+      wrap.appendChild(inner);
+      el.appendChild(wrap);
+      setTimeout(() => {
+        inner.style.transform = `translateY(-${parseInt(d, 10) * 1.05}em)`;
+      }, 150 + i * 70);
+    });
+
+    if (suffix) {
+      const s = document.createElement('span');
+      s.textContent = suffix;
+      s.style.cssText = 'font-size:0.52em;opacity:0.5;align-self:flex-end;padding-bottom:0.12em;margin-left:2px;';
+      el.appendChild(s);
+    }
+  }
+
+  const odoObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('[data-odo]').forEach(buildOdometer);
+        odoObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  const ss = document.querySelector('.stats');
+  if (ss) odoObs.observe(ss);
+
+  /* ── STEP NUM COUNTER — 00 → 01/02/03 ──── */
+  const stepObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const final = parseInt(el.dataset.final, 10);
+        let cur = 0;
+        const iv = setInterval(() => {
+          cur++;
+          el.textContent = String(cur).padStart(2, '0');
+          if (cur >= final) { clearInterval(iv); el.textContent = el.dataset.final; }
+        }, 55);
+        stepObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.step-num[data-final]').forEach(el => stepObs.observe(el));
+
+  /* ── FAQ ACCORDION ─────────────────────── */
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isOpen = btn.getAttribute('aria-expanded') === 'true';
+      document.querySelectorAll('.faq-q').forEach(b => {
+        b.setAttribute('aria-expanded', 'false');
+        b.nextElementSibling.classList.remove('open');
+      });
+      if (!isOpen) {
+        btn.setAttribute('aria-expanded', 'true');
+        btn.nextElementSibling.classList.add('open');
+      }
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

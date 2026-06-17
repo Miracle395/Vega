@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vega | Decentralized Spot Exchange Aggregator on SUI, powered by Deepbook Liquidity.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link rel="icon" href="vega.png" type="image/png" sizes="16x16" />
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="vega-mobile.css">
+<link rel="stylesheet" href="vega-desktop.css">
+  
+</head>
+<body>
+
+<!-- Mobile sidebar drawer -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-drawer" id="sidebar-drawer">
+  <div class="sidebar-header">
+    <div class="nav-logo">
+      <svg class="cairn-mark" width="18" height="18" viewBox="0 0 18 18" fill="none">
+  <polygon points="9,1 11.2,6.8 17.5,6.8 12.6,10.6 14.5,16.5 9,12.9 3.5,16.5 5.4,10.6 0.5,6.8 6.8,6.8" fill="currentColor"/>
+</svg>
+      <span class="nav-logo-text">Vega</span>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+   <a class="sidebar-link" onclick="navigate('execute');closeSidebar()">Trade</a>
+    <a class="sidebar-link" onclick="navigate('markets');closeSidebar()">Markets</a>
+    <a class="sidebar-link" onclick="navigate('archive');closeSidebar()">Archive</a>
+ <a class="sidebar-link" onclick="navigate('account');closeSidebar()">Portfolio</a>
+    <div class="sidebar-divider"></div>
+    <a class="sidebar-link" onclick="navigate('earn');closeSidebar()">Earn</a>
+    <a class="sidebar-link" onclick="navigate('vaults');closeSidebar()">Vaults</a>
+    <a class="sidebar-link" onclick="navigate('staking');closeSidebar()">Staking</a>
+    <a class="sidebar-link" onclick="navigate('referrals');closeSidebar()">Referrals</a>
+    <a class="sidebar-link" onclick="navigate('leaderboard');closeSidebar()">Leaderboard</a>    
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════════════════════ -->
+<nav class="nav">
+    
+    <button class="nav-hamburger" onclick="openSidebar()">
+  <svg width="18" height="18" fill="none" stroke="currentColor"
+       stroke-width="2" viewBox="0 0 24 24">
+    <line x1="3" y1="6"  x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+    
+ <div class="nav-logo" onclick="navigate('markets')">
+      <svg class="cairn-mark" width="18" height="18" viewBox="0 0 18 18" fill="none">
+  <polygon points="9,1 11.2,6.8 17.5,6.8 12.6,10.6 14.5,16.5 9,12.9 3.5,16.5 5.4,10.6 0.5,6.8 6.8,6.8" fill="currentColor"/>
+</svg>
+      <span class="nav-logo-text">Vega</span>
+  </div>
+
+  <div class="nav-links">
+  <a class="nav-link" id="nav-execute" onclick="navigate('execute')">Trade</a>
+        <a class="nav-link" id="nav-markets" onclick="navigate('markets')">Markets</a>
+        <a class="nav-link" id="nav-account" onclick="navigate('account')">Portfolio</a>
+        <a class="nav-link" id="nav-archive" onclick="navigate('archive')">Archive</a>
+ 
+  </div>
+
+  <div class="nav-right">
+  <button class="btn-connect" id="btn-connect" onclick="handleConnect(this)">Connect</button>
+  <div class="nav-icon-group">
+  <button class="nav-icon-btn" title="Language">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+  <button class="nav-icon-btn" onclick="navigate('settings')" title="Settings">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
+  </div>
+</div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     PAGE: TRADE
+══════════════════════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PAGE: MARKETS
+══════════════════════════════════════════════════════ -->
+<div id="page-markets" class="page active">
+  <div class="trade-layout">
+
+    <main class="trade-center">
+
+      <!-- ── Strip (full width, row 1) ── -->
+      <section class="trade-strip">
+        <div class="strip-asset-selector" id="strip-asset-selector" onclick="toggleAssetDropdown()">
+          <div class="strip-asset-icon" id="strip-asset-icon"></div>
+          <div class="strip-asset-name-group">
+            <span class="strip-asset-name" id="strip-asset-name">BTC/USDC</span>
+            <svg class="strip-asset-chevron" id="strip-asset-chevron" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="strip-asset-price-group">
+            <span class="strip-inline-price" id="strip-stat-price">—</span>
+          </div>
+        </div>
+        <div class="strip-stats" id="strip-stats">
+          <div class="strip-stat-group">
+            <span class="strip-stat-label">24h Change</span>
+            <span class="strip-stat-val" id="strip-stat-change">— / —</span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-stat-group">
+            <span class="strip-stat-label">24h Volume</span>
+            <span class="strip-stat-val" id="strip-stat-vol">—</span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-stat-group">
+            <span class="strip-stat-label">Market Cap</span>
+            <span class="strip-stat-val" id="strip-stat-mcap">—</span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-stat-group">
+            <span class="strip-stat-label">Spread</span>
+            <span class="strip-stat-val" id="strip-stat-spread">—</span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-stat-group">
+            <span class="strip-stat-label" id="strip-stat-route-label">Route Score</span>
+            <span class="strip-stat-val" id="strip-stat-route">—</span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-stat-group">
+            <span class="strip-stat-label">Depth (SUI)</span>
+            <span class="strip-stat-val" id="strip-stat-depth">— / —</span>
+            <div class="strip-depth-bar">
+              <div class="strip-depth-bid" id="strip-depth-bid-bar"></div>
+              <div class="strip-depth-ask" id="strip-depth-ask-bar"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+   <!-- ── Col 1: Chart (row 2) ── -->
+      <div class="chart-container">
+        <div class="chart-inner">
+          <div id="tradingview_chart" class="chart-frame"></div>
+        </div>
+      </div>
+
+    <!-- ── Bottom Panel: Open Orders / Positions (row 3) ── -->
+      <section class="exec-feed" id="exec-feed">
+
+        <!-- Mobile only: collapsible Recent Activity header -->
+        <div class="exec-feed-header" onclick="toggleExecFeed()">
+          <span class="exec-feed-title">Recent Activity</span>
+          <span class="exec-feed-toggle-arrow">▾</span>
+        </div>
+        <div class="exec-feed-cols">
+          <span>Batch</span><span>Pair</span><span>Size</span>
+          <span>Route</span><span>Savings</span><span>Tx</span><span>Time</span>
+        </div>
+        <div class="exec-feed-body" id="exec-feed-body">
+          <div class="exec-feed-skel-row"></div>
+          <div class="exec-feed-skel-row"></div>
+          <div class="exec-feed-skel-row"></div>
+        </div>
+
+        <!-- Desktop only: tabs -->
+        <div class="bottom-panel-tabs">
+          <span class="bottom-panel-tab active" id="bpt-orders" onclick="switchBottomTab('orders', this)">Open Orders</span>
+          <span class="bottom-panel-tab" id="bpt-history" onclick="switchBottomTab('history', this)">Order History</span>
+          <span class="bottom-panel-tab" id="bpt-positions" onclick="switchBottomTab('positions', this)">Positions</span>
+        </div>
+
+        <!-- Open Orders -->
+        <div class="bottom-panel-body" id="bp-orders">
+          <div class="bp-cols bp-orders-cols">
+            <span>Pair</span><span>Side</span><span>Type</span>
+            <span>Price</span><span>Size</span><span>Filled</span>
+            <span>Status</span><span class="r">Time</span>
+          </div>
+          <div class="bp-empty" id="bp-orders-empty">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--soft)">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            <span class="bp-empty-title">No open orders</span>
+            <span class="bp-empty-sub">Place an order to get started</span>
+          </div>
+          <div class="bp-rows-body" id="bp-orders-body" style="display:none;"></div>
+        </div>
+
+        <!-- Order History -->
+        <div class="bottom-panel-body" id="bp-history" style="display:none;">
+          <div class="bp-cols bp-orders-cols">
+            <span>Pair</span><span>Side</span><span>Type</span>
+            <span>Price</span><span>Size</span><span>Filled</span>
+            <span>Status</span><span class="r">Time</span>
+          </div>
+          <div class="bp-empty">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--soft)">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+            </svg>
+            <span class="bp-empty-title">No order history</span>
+            <span class="bp-empty-sub">Completed orders will appear here</span>
+          </div>
+        </div>
+
+        <!-- Positions -->
+        <div class="bottom-panel-body" id="bp-positions" style="display:none;">
+          <div class="bp-positions-header">
+            <div class="bp-cols bp-pos-cols">
+              <span>Asset</span><span>Total</span><span>Avg Price</span>
+              <span>Mark Price</span><span>P&amp;L (USDC)</span><span class="r">P&amp;L %</span>
+            </div>
+            <label class="bp-hide-small">
+              <input type="checkbox" id="bp-hide-small-cb" onchange="toggleHideSmall(this)">
+              <span>Hide Small Balances</span>
+            </label>
+          </div>
+          <div id="bp-positions-body">
+            <div class="bp-empty">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--soft)">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span class="bp-empty-title">No positions</span>
+              <span class="bp-empty-sub">Connect wallet to view balances</span>
+            </div>
+          </div>
+          <div class="bp-positions-footer" id="bp-positions-footer" style="display:none;">
+            <span>Total Equity (USDC)</span>
+            <span id="bp-total-equity">—</span>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+   <!-- ── Col 2: Order Book ── -->
+    <aside class="orderbook-panel">
+      <div class="ob-drag-handle" id="ob-drag-handle"><span></span></div>
+
+      <!-- Mobile only: 2 tabs -->
+      <div class="ob-tabs ob-tabs-mobile">
+        <span class="ob-tab active" onclick="switchOBTab('book', this)">OrderBook</span>
+        <span class="ob-tab" onclick="switchOBTab('trades', this)">Trades</span>
+      </div>
+
+      <!-- Desktop only: 2 tabs (Depth lives in the lower panel) -->
+      <div class="ob-tabs ob-tabs-desktop">
+        <span class="ob-tab active" onclick="switchOBTab('book', this)">OrderBook</span>
+        <span class="ob-tab" onclick="switchOBTab('trades', this)">Trades</span>
+      </div>
+
+      <div class="ob-cols">
+        <span>Price</span>
+        <span>Size</span>
+        <span>Total</span>
+      </div>
+      <div class="ob-batches-scroll" id="ob-batches-scroll"></div>
+      <div class="ob-trades-body" id="ob-trades-body" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
+    </aside>
+
+    <!-- ── Col 3: Execute ── -->
+    <aside class="trade-right">
+      <div class="trade-panel" id="trade-panel">
+
+        <div class="trade-topbar">
+          <div class="trade-tabs">
+            <div class="trade-tab active"   onclick="setTradeTab(this,'market')">Market</div>
+            <div class="trade-tab"          onclick="setTradeTab(this,'limit')">Limit</div>
+            <div class="trade-tab"          onclick="setTradeTab(this,'twap')">TWAP</div>
+          </div>
+          <div class="trade-pair-inline">
+  <div class="pair-main" id="trade-pair"></div>
+  <div class="pair-sub"><span id="trade-price"></span></div>
+</div>
+        </div>
+
+        <!-- ── Buy / Sell toggle — shared across all tabs ── -->
+        <div class="trade-side-toggle">
+          <button class="side-btn buy active" onclick="setSide('buy', this)">Buy</button>
+          <button class="side-btn sell"       onclick="setSide('sell', this)">Sell</button>
+        </div>
+
+        <!-- ══════════════════════════════
+             MARKET PANEL
+        ══════════════════════════════ -->
+        <div id="trade-panel-market" class="trade-panel-section">
+
+          <div class="trade-balance-row">
+            <span>Available</span>
+            <span id="trade-balance">0.00 DBUSDC</span>
+          </div>
+
+          <div class="trade-size-box">
+            <input id="trade-size-input" class="trade-size-input"
+                   placeholder="0.00" inputmode="decimal" oninput="onTradeInput(this)">
+            <span class="trade-size-unit" id="trade-size-unit">BTC</span>
+          </div>
+
+          <div class="trade-slider-wrap">
+            <input type="range" id="trade-slider" min="0" max="100" value="0"
+                   oninput="setTradePct(this.value); document.getElementById('trade-pct').textContent=Math.round(this.value)+'%'">
+            <span id="trade-pct">0%</span>
+          </div>
+
+          <div class="trade-preview">
+            <div class="preview-row"><span>Execution Value</span>  <span id="preview-value">—</span></div>
+            <div class="preview-row"><span>Route Fee</span>         <span id="preview-fees">—</span></div>
+            <div class="preview-row"><span>Est. Fill</span>         <span id="preview-fill">—</span></div>
+            <div class="preview-row"><span>Market Impact</span>     <span id="preview-impact">—</span></div>
+          </div>
+
+          <button class="trade-btn" id="trade-btn">
+            Connect Wallet
+          </button>
+
+          <div class="trade-route" id="trade-route">
+            <div class="route-header">
+              <span>Vega Route Intelligence</span>
+              <span id="route-score" style="display:none;"></span>
+            </div>
+            <div class="route-body" id="route-body">Analysing routes...</div>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════════════════
+             LIMIT PANEL
+        ══════════════════════════════ -->
+        <div id="trade-panel-limit" class="trade-panel-section" style="display:none;">
+
+          <div class="trade-balance-row">
+            <span>Available</span>
+            <span id="limit-balance">0.00 DBUSDC</span>
+          </div>
+
+          <!-- Limit price input -->
+          <div class="trade-field-label">Price (USDC)</div>
+          <div class="trade-size-box">
+            <input id="limit-price-input" class="trade-size-input"
+                   placeholder="0.00" inputmode="decimal"
+                   oninput="onLimitInput()">
+            <span class="trade-size-unit limit-mid-tag" id="limit-mid-tag">Mid</span>
+          </div>
+
+          <!-- Size input -->
+          <div class="trade-field-label" style="margin-top:8px;">Size</div>
+          <div class="trade-size-box">
+            <input id="limit-size-input" class="trade-size-input"
+                   placeholder="0.00" inputmode="decimal"
+                   oninput="onLimitInput()">
+            <span class="trade-size-unit" id="limit-size-unit">BTC</span>
+          </div>
+
+          <div class="trade-slider-wrap">
+            <input type="range" id="limit-slider" min="0" max="100" value="0"
+                   oninput="setLimitPct(this.value); document.getElementById('limit-pct').textContent=Math.round(this.value)+'%'">
+            <span id="limit-pct">0%</span>
+          </div>
+
+          <!-- TIF selector -->
+          <div class="trade-tif-row">
+            <span class="trade-field-label">TIF</span>
+            <div class="tif-tabs">
+              <button class="tif-tab active" onclick="setTIF(this,'GTC')">GTC</button>
+              <button class="tif-tab"        onclick="setTIF(this,'IOC')">IOC</button>
+              <button class="tif-tab"        onclick="setTIF(this,'FOK')">FOK</button>
+            </div>
+          </div>
+
+          <div class="trade-preview">
+            <div class="preview-row"><span>Execution Value</span> <span id="limit-preview-value">—</span></div>
+            <div class="preview-row"><span>Route Fee</span>        <span id="limit-preview-fees">—</span></div>
+          </div>
+
+          <button class="trade-btn" id="limit-trade-btn"
+                  onclick="handleConnect(document.getElementById('btn-connect'))">
+            Connect Wallet
+          </button>
+
+        </div>
+
+        <!-- ══════════════════════════════
+             TWAP PANEL
+        ══════════════════════════════ -->
+        <div id="trade-panel-twap" class="trade-panel-section" style="display:none;">
+
+          <div class="trade-balance-row">
+            <span>Available</span>
+            <span id="twap-balance">0.00 DBUSDC</span>
+          </div>
+
+          <!-- Total size -->
+          <div class="trade-field-label">Total Size</div>
+          <div class="trade-size-box">
+            <input id="twap-size-input" class="trade-size-input"
+                   placeholder="0.00" inputmode="decimal"
+                   oninput="onTWAPInput()">
+            <span class="trade-size-unit" id="twap-size-unit">BTC</span>
+          </div>
+
+          <div class="trade-slider-wrap">
+            <input type="range" id="twap-slider" min="0" max="100" value="0"
+                   oninput="setTWAPPct(this.value); document.getElementById('twap-pct').textContent=Math.round(this.value)+'%'">
+            <span id="twap-pct">0%</span>
+          </div>
+
+          <!-- Running time -->
+          <div class="trade-field-label" style="margin-top:8px;">Running Time <span class="trade-field-hint">(5m – 24h)</span></div>
+          <div class="twap-time-row">
+            <div class="trade-size-box twap-time-box">
+              <input id="twap-hours" class="trade-size-input" type="number"
+                     placeholder="0" min="0" max="24" value="0"
+                     oninput="onTWAPInput()">
+              <span class="trade-size-unit">Hr</span>
+            </div>
+            <div class="trade-size-box twap-time-box">
+              <input id="twap-minutes" class="trade-size-input" type="number"
+                     placeholder="30" min="0" max="59" value="30"
+                     oninput="onTWAPInput()">
+              <span class="trade-size-unit">Min</span>
+            </div>
+          </div>
+
+          <!-- Randomize -->
+          <label class="twap-randomize-row">
+            <input type="checkbox" id="twap-randomize" onchange="onTWAPInput()">
+            <span>Randomize order timing</span>
+          </label>
+
+          <button class="trade-btn" id="twap-trade-btn"
+                  onclick="handleConnect(document.getElementById('btn-connect'))">
+            Connect Wallet
+          </button>
+
+          <!-- TWAP computed stats -->
+          <div class="trade-preview twap-stats">
+            <div class="preview-row"><span>Frequency</span>      <span id="twap-stat-freq">—</span></div>
+            <div class="preview-row"><span>Runtime</span>        <span id="twap-stat-runtime">—</span></div>
+            <div class="preview-row"><span>No. of Orders</span>  <span id="twap-stat-orders">—</span></div>
+            <div class="preview-row"><span>Size per Order</span> <span id="twap-stat-size">—</span></div>
+            <div class="preview-row"><span>Fees</span>           <span id="twap-stat-fees">—</span></div>
+          </div>
+
+     </div>
+
+        <!-- ── Market Stats ── -->
+        <div class="market-stats-panel">
+          <div class="market-stats-header">Market Stats</div>
+          <div class="market-stats-row">
+            <span class="market-stats-label">24H Volume</span>
+            <span class="market-stats-val" id="ms-vol">—</span>
+          </div>
+          <div class="market-stats-row">
+            <span class="market-stats-label">Total Liquidity</span>
+            <span class="market-stats-val" id="ms-liq">—</span>
+          </div>
+          <div class="market-stats-row">
+            <span class="market-stats-label">Markets</span>
+            <span class="market-stats-val" id="ms-markets">—</span>
+          </div>
+          <div class="market-stats-row">
+            <span class="market-stats-label">Traders</span>
+            <span class="market-stats-val" id="ms-traders">—</span>
+          </div>
+          <div class="market-stats-powered">
+            <span class="market-stats-powered-text">Powered by</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <span class="market-stats-powered-brand">DeepBook</span>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+
+
+<!-- ══════════════════════════════════════════════════
+     PAGE: ACCOUNT
+══════════════════════════════════════════════════════ -->
+
+<div id="page-account" class="page">
+  <div class="acct-wrap">
+
+    <!-- Header -->
+    <div class="acct-header">
+      <div class="acct-header-left">
+        <span class="acct-title">Account</span>
+        <span class="acct-network-badge" id="acct-network-badge" style="display:none"></span>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="acct-stats-row">
+      <div class="acct-stat">
+        <span class="acct-stat-label">Total Balance</span>
+        <span class="acct-stat-val" id="acct-total-balance">0.00</span>
+      </div>
+      <div class="acct-stat">
+        <span class="acct-stat-label">Available</span>
+        <span class="acct-stat-val" id="acct-available">0.00</span>
+      </div>
+      <div class="acct-stat">
+        <span class="acct-stat-label">Total Swapped</span>
+        <span class="acct-stat-val" id="acct-total-swapped">0.00</span>
+      </div>
+      <div class="acct-stat">
+        <span class="acct-stat-label">Total Saved</span>
+        <span class="acct-stat-val acct-stat-green" id="acct-total-saved">0.00</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="acct-tabs">
+      <button class="acct-tab active" onclick="switchAcctTab('balances', this)">Balances</button>
+      <button class="acct-tab" onclick="switchAcctTab('history', this)">Swap History</button>
+      <button class="acct-tab" onclick="switchAcctTab('orders', this)">Open Orders</button>
+    </div>
+
+    <!-- Tab content -->
+    <div class="acct-tab-content" id="acct-tab-content">
+
+      <!-- Balances -->
+      <div id="acct-balances" class="acct-panel active">
+        <div class="acct-empty">
+          <div class="acct-empty-icon">
+            <svg width="22" height="22" fill="none" stroke="#0a7a0a" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h.01"/>
+            </svg>
+          </div>
+          <div class="acct-empty-title">No balances yet</div>
+          <div class="acct-empty-sub">Connect your wallet to view token balances</div>
+        </div>
+      </div>
+
+      <!-- Swap History -->
+      <div id="acct-history" class="acct-panel">
+        <div class="acct-history-cols">
+          <span>Pair</span>
+          <span>Amount</span>
+          <span>Route</span>
+          <span>Saved</span>
+          <span class="r">Time</span>
+        </div>
+        <div id="acct-history-body">
+          <div class="acct-empty">
+            <div class="acct-empty-icon">
+              <svg width="22" height="22" fill="none" stroke="#0a7a0a" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+              </svg>
+            </div>
+            <div class="acct-empty-title">No execution history</div>
+            <div class="acct-empty-sub">Your completed trades will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Orders -->
+      <div id="acct-orders" class="acct-panel">
+        <div class="acct-empty">
+          <div class="acct-empty-icon">
+            <svg width="22" height="22" fill="none" stroke="#0a7a0a" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+            </svg>
+          </div>
+          <div class="acct-empty-title">No active orders</div>
+          <div class="acct-empty-sub">Your TWAP and limit orders will appear here</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PAGE: EXECUTE
+══════════════════════════════════════════════════════ -->
+<div id="page-execute" class="page">
+
+  <!-- Order type tabs -->
+  <div class="exec-tabs">
+    <button class="exec-tab active" onclick="setExecTab(this,'market')">Market</button>
+    <button class="exec-tab"        onclick="setExecTab(this,'limit')">Limit</button>
+    <button class="exec-tab"        onclick="setExecTab(this,'twap')">TWAP</button>
+  </div>
+
+  <!-- ── MARKET PANEL ── -->
+  <div id="exec-panel-market" class="exec-panel active-exec-panel">
+
+    <div class="exec-side-toggle">
+      <button class="exec-side-btn buy active" onclick="setExecSide('buy', this)">Buy</button>
+      <button class="exec-side-btn sell"       onclick="setExecSide('sell', this)">Sell</button>
+    </div>
+
+    <div class="exec-balance-row">
+      <span>Available</span>
+      <span id="exec-balance">0.00 DBUSDC</span>
+    </div>
+
+    <div class="exec-input-box">
+      <input id="exec-size-input" class="exec-input" placeholder="0.00"
+             inputmode="decimal" oninput="onExecInput(this)">
+      <span class="exec-input-unit" id="exec-size-unit">SUI</span>
+    </div>
+
+    <div class="exec-slider-wrap">
+      <input type="range" id="exec-slider" min="0" max="100" value="0"
+             oninput="setExecPct(this.value); document.getElementById('exec-pct').textContent=Math.round(this.value)+'%'">
+      <span id="exec-pct">0%</span>
+    </div>
+
+    <div class="exec-preview">
+      <div class="exec-preview-row"><span>Execution Value</span> <span id="exec-preview-value">—</span></div>
+      <div class="exec-preview-row"><span>Route Fee</span>        <span id="exec-preview-fees">—</span></div>
+      <div class="exec-preview-row"><span>Est. Fill</span>        <span id="exec-preview-fill">—</span></div>
+      <div class="exec-preview-row"><span>Market Impact</span>    <span id="exec-preview-impact">—</span></div>
+    </div>
+
+    <button class="exec-btn" id="exec-btn">Connect Wallet</button>
+
+    <div class="exec-route" id="exec-route">
+      <div class="exec-route-header">
+        <span>Vega Route Intelligence</span>
+        <span id="exec-route-score"></span>
+      </div>
+      <div class="exec-route-body" id="exec-route-body">Analysing routes...</div>
+    </div>
+
+  </div><!-- end market panel -->
+
+  <!-- ── LIMIT PANEL ── -->
+  <div id="exec-panel-limit" class="exec-panel" style="display:none;">
+
+    <div class="exec-side-toggle">
+      <button class="exec-side-btn buy active" onclick="setExecSide('buy', this)">Buy</button>
+      <button class="exec-side-btn sell"       onclick="setExecSide('sell', this)">Sell</button>
+    </div>
+
+    <div class="exec-balance-row">
+      <span>Available</span>
+      <span id="exec-limit-balance">0.00 DBUSDC</span>
+    </div>
+
+    <div class="exec-field-label">Price (USDC)</div>
+    <div class="exec-input-box">
+      <input id="exec-limit-price" class="exec-input" placeholder="0.00" inputmode="decimal">
+      <span class="exec-input-unit">Mid</span>
+    </div>
+
+    <div class="exec-field-label" style="margin-top:8px;">Size</div>
+    <div class="exec-input-box">
+      <input id="exec-limit-size" class="exec-input" placeholder="0.00" inputmode="decimal">
+      <span class="exec-input-unit" id="exec-limit-size-unit">SUI</span>
+    </div>
+
+    <div class="exec-slider-wrap">
+      <input type="range" id="exec-limit-slider" min="0" max="100" value="0">
+      <span id="exec-limit-pct">0%</span>
+    </div>
+
+    <div class="exec-tif-row">
+      <span class="exec-field-label">TIF</span>
+      <div class="exec-tif-tabs">
+        <button class="exec-tif-btn active" onclick="setExecTIF(this,'GTC')">GTC</button>
+        <button class="exec-tif-btn"        onclick="setExecTIF(this,'IOC')">IOC</button>
+        <button class="exec-tif-btn"        onclick="setExecTIF(this,'FOK')">FOK</button>
+      </div>
+    </div>
+
+    <div class="exec-preview">
+      <div class="exec-preview-row"><span>Execution Value</span> <span id="exec-limit-preview-value">—</span></div>
+      <div class="exec-preview-row"><span>Route Fee</span>        <span id="exec-limit-preview-fees">—</span></div>
+    </div>
+
+    <button class="exec-btn" id="exec-limit-btn"
+            onclick="handleConnect(document.getElementById('btn-connect'))">
+      Connect Wallet
+    </button>
+
+  </div><!-- end limit panel -->
+
+  <!-- ── TWAP PANEL ── -->
+  <div id="exec-panel-twap" class="exec-panel" style="display:none;">
+
+    <div class="exec-side-toggle">
+      <button class="exec-side-btn buy active" onclick="setExecSide('buy', this)">Buy</button>
+      <button class="exec-side-btn sell"       onclick="setExecSide('sell', this)">Sell</button>
+    </div>
+
+    <div class="exec-balance-row">
+      <span>Available</span>
+      <span id="exec-twap-balance">0.00 DBUSDC</span>
+    </div>
+
+    <div class="exec-field-label">Total Size</div>
+    <div class="exec-input-box">
+      <input id="exec-twap-size" class="exec-input" placeholder="0.00" inputmode="decimal">
+      <span class="exec-input-unit" id="exec-twap-size-unit">SUI</span>
+    </div>
+
+    <div class="exec-slider-wrap">
+      <input type="range" id="exec-twap-slider" min="0" max="100" value="0">
+      <span id="exec-twap-pct">0%</span>
+    </div>
+
+    <div class="exec-field-label" style="margin-top:8px;">Running Time <span class="exec-field-hint">(5m – 24h)</span></div>
+    <div class="exec-time-row">
+      <div class="exec-input-box exec-time-box">
+        <input id="exec-twap-hours" class="exec-input" type="number" placeholder="0" min="0" max="24" value="0">
+        <span class="exec-input-unit">Hr</span>
+      </div>
+      <div class="exec-input-box exec-time-box">
+        <input id="exec-twap-minutes" class="exec-input" type="number" placeholder="30" min="0" max="59" value="30">
+        <span class="exec-input-unit">Min</span>
+      </div>
+    </div>
+
+    <label class="exec-randomize-row">
+      <input type="checkbox" id="exec-twap-randomize">
+      <span>Randomize order timing</span>
+    </label>
+
+    <button class="exec-btn" id="exec-twap-btn"
+            onclick="handleConnect(document.getElementById('btn-connect'))">
+      Connect Wallet
+    </button>
+
+    <div class="exec-preview exec-twap-stats">
+      <div class="exec-preview-row"><span>Frequency</span>      <span id="exec-twap-freq">—</span></div>
+      <div class="exec-preview-row"><span>Runtime</span>        <span id="exec-twap-runtime">—</span></div>
+      <div class="exec-preview-row"><span>No. of Orders</span>  <span id="exec-twap-orders">—</span></div>
+      <div class="exec-preview-row"><span>Size per Order</span> <span id="exec-twap-size-stat">—</span></div>
+      <div class="exec-preview-row"><span>Fees</span>           <span id="exec-twap-fees">—</span></div>
+    </div>
+
+  </div><!-- end twap panel -->
+
+</div><!-- end page-execute -->
+
+<!-- ══════════════════════════════════════════════════
+     PAGE: SETTINGS
+══════════════════════════════════════════════════════ -->
+<div id="page-settings" class="page settings-page">
+  <div class="settings-inner">
+    <div class="settings-title-row">
+      <div class="settings-title">Settings</div>
+      <button class="settings-close-btn" onclick="navigate('markets')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-head">Trading</div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Persist Trading Connection</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Skip Open Order Confirmation</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Skip Close Position Confirmation</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Hold to Close All Positions</span><div class="toggle"></div></div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-head">Display</div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Show Buys and Sells on Chart</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Set Order Book Size on Click</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Animate Order Book</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Disable Background Fill Notifications</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Disable Sound for Fills</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Hide PNL</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Show All Warnings</span><div class="toggle on"></div></div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-head">Advanced</div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Disable HIP-3 Dex Abstraction</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Disable Unified Account Mode</span><div class="toggle on"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Disable Transaction Delay Protection</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Display Verbose Errors</span><div class="toggle"></div></div>
+      <div class="settings-row" onclick="toggleSetting(this)"><span class="settings-row-label">Opt Out of Spot Dusting</span><div class="toggle"></div></div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-row"><a class="settings-link">Return to Default Layout</a></div>
+      <div class="settings-row"><a class="settings-link">Terms of Use</a></div>
+      <div class="settings-row"><a class="settings-link">Privacy Policy</a></div>
+      <div class="settings-row" style="cursor:default;"><span class="settings-version">rev 2026-06-14 · vega-v1.0.0</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     PLACEHOLDER PAGES
+══════════════════════════════════════════════════════ -->
+    
+
+
+<div class="panel-backdrop" id="panel-backdrop" onclick="closeOrderPanel()"></div>
+
+<nav class="mobile-bottom-nav">
+
+  <button class="mob-nav-item active"
+          id="mob-markets"
+          onclick="navigate('markets')">
+
+    <i data-lucide="chart-column"></i>
+    <span>Markets</span>
+
+  </button>
+
+
+  <button class="mob-nav-item is-primary"
+          id="mob-execute"
+          onclick="navigate('execute')">
+
+    <span class="mob-nav-icon-wrap"><i data-lucide="zap"></i></span>
+    <span class="mob-nav-label">Trade</span>
+
+  </button>
+
+
+  <button class="mob-nav-item"
+          id="mob-account"
+          onclick="navigate('account')">
+
+<i data-lucide="user-round"></i>
+    <span>Portfolio</span>
+
+  </button>
+
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-links">
+    <span class="footer-link">Docs</span>
+    <span class="footer-link">Support</span>
+    <span class="footer-link">Terms</span>
+    <span class="footer-link">Privacy Policy</span>
+  </div>
+</footer>
+
+<!-- ── TOKEN SELECTOR MODAL ── -->
+<div class="token-modal-backdrop" id="token-modal-backdrop" onclick="closeTokenModal()"></div>
+<div class="token-modal" id="token-modal">
+  <div class="token-modal-header">
+    <span class="token-modal-title">Select Token</span>
+    <button class="token-modal-close" onclick="closeTokenModal()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="token-modal-search-wrap">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input
+      class="token-modal-search"
+      id="token-modal-search"
+      placeholder="Search name or paste address…"
+      oninput="filterTokenModal(this.value)"
+      autocomplete="off"
+    >
+  </div>
+  <div class="token-modal-common">
+    <span class="token-modal-section-label">Common</span>
+    <div class="token-common-pills" id="token-common-pills"></div>
+  </div>
+  <div class="token-modal-list" id="token-modal-list"></div>
+</div>
+
+ <!-- Asset dropdown (positioned absolute, lives here) -->
+      <div class="asset-dropdown" id="asset-dropdown">
+        <div class="asset-dropdown-top">
+          <div class="asset-dropdown-search-wrap">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="asset-dropdown-search" id="asset-dropdown-search"
+                   placeholder="Search markets…"
+                   oninput="filterAssetDropdown(this.value)" autocomplete="off">
+          </div>
+        </div>
+        <div class="asset-dropdown-cols">
+          <span>Symbol</span>
+          <span class="r">Price</span>
+          <span class="r">24h Change</span>
+          <span class="r">Volume</span>
+        </div>
+        <div class="asset-dropdown-list" id="asset-dropdown-list"></div>
+      </div>
+      <div class="asset-dropdown-backdrop" id="asset-dropdown-backdrop" onclick="closeAssetDropdown()"></div>
+
+<script src="vega-wallet.js"></script>
+
+<script src="vega-executor.js"></script>
+
+<script src="vega.js"></script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+  lucide.createIcons();
+</script>
+
+</body>
+</html>
