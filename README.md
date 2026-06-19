@@ -35,22 +35,16 @@ Both spot and margin sit on the same DeepBook liquidity layer, Vega doesn't frag
 
 ---
 
-## Screenshots
-
-| Borrow | Supply | Landing |
-|---|---|---|
-| Live SUI borrow market against DBUSDC collateral, 5x max leverage, real-time pool health | DBUSDC supply market with live APY, total supplied, and supply cap | Mint-green/black brand identity, built-with partner strip |
-
----
-
 ## Tech Stack
 
 Vega is deliberately framework free; vanilla HTML, CSS and JavaScript, no React/Vue/build step.
 
 - **Chain:** Sui (Testnet)
 - **Liquidity & Margin Engine:** DeepBook V3 (Spot + Margin)
+- 
 - **RPC:** Tatum RPC, Sui Fullnode RPC.
 - **Pricing:** DeepBook indexer, CoinGecko.
+- 
 - **Frontend:** Vanilla JS, CSS (mint green `#d8f8d8` + black design system), Space Grotesk / Inter.
 - **Deployment:** Vercel.
 
