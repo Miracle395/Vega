@@ -41,10 +41,10 @@ Vega is deliberately framework free; vanilla HTML, CSS and JavaScript, no React/
 
 - **Chain:** Sui (Testnet)
 - **Liquidity & Margin Engine:** DeepBook V3 (Spot + Margin)
-- 
+  
 - **RPC:** Tatum RPC, Sui Fullnode RPC.
 - **Pricing:** DeepBook indexer, CoinGecko.
-- 
+  
 - **Frontend:** Vanilla JS, CSS (mint green `#d8f8d8` + black design system), Space Grotesk / Inter.
 - **Deployment:** Vercel.
 
