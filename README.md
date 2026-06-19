@@ -14,7 +14,8 @@ Demo video: *coming soon*
 
 ## What Vega does
 
-Most DEX terminals stop at spot. Vega goes further by building **two DeepBook primitives into one product**:
+Most DEX terminals stop at spot. 
+Vega goes further by building **two DeepBook primitives into one product**:
 
 ### Spot Trading
 - Live order routing and pricing sourced directly from the **DeepBook V3 indexer** — no static or cached routes
