@@ -1,0 +1,633 @@
+/* ================================================================
+   VEGA MARGIN — vegamargin.css
+   Curvance-inspired dark list layout.
+   Forced dark regardless of app theme.
+   All rules scoped to #page-earn.
+================================================================ */
+
+/* ── FORCE DARK ON EARN PAGE ────────────────────────────────── */
+
+#page-earn {
+  --bg:           #05080F;
+  --panel:        #090D18;
+  --panel-2:      #0D1220;
+  --panel-3:      #111827;
+  --text:         #F0F4FF;
+  --muted:        #7A90B0;
+  --soft:         #4E5F7A;
+  --border:       rgba(240, 244, 255, .06);
+  --border-mid:   rgba(240, 244, 255, .09);
+  --green:        #d8f8d8;
+  --green-soft:   rgba(216, 248, 216, .10);
+  --red:          #EA3943;
+  --accent:       #1B4FFF;
+  --accent-hover: #4F8CFF;
+  --accent-soft:  rgba(29, 111, 255, .12);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:    0 8px 24px rgba(0,0,0,.6);
+  --radius-sm:    10px;
+  --radius-md:    14px;
+  --radius-lg:    18px;
+
+  background: var(--bg);
+  color: var(--text);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── SHELL ──────────────────────────────────────────────────── */
+
+.mg-shell {
+  max-width: 100%;
+  margin: 0;
+  padding: 14px 14px 88px;
+}
+
+/* ── HERO STATS ─────────────────────────────────────────────── */
+
+.mg-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mg-hero-stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.mg-hero-stat span {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin-bottom: 6px;
+}
+
+.mg-hero-stat strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  color: var(--text);
+  letter-spacing: -.02em;
+}
+
+/* Third stat spans full width */
+.mg-hero-stat:nth-child(3) {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+}
+
+.mg-hero-stat:nth-child(3) span { margin-bottom: 0; }
+
+.mg-hero-divider { display: none; }
+
+/* ── HEALTH BAR (inline in 3rd stat) ───────────────────────── */
+
+.mg-hero-stat:nth-child(3) .hero-bar-wrap {
+  flex: 1;
+  margin: 0 14px;
+}
+
+.health-bar {
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--panel-3);
+}
+
+.health-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green), #4F8CFF);
+  transition: width .5s ease;
+}
+
+.market-health {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.market-health .health-bar { flex: 1; }
+
+.health-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.health-meta strong {
+  color: var(--green);
+  font-family: 'Geist Mono', monospace;
+  font-weight: 700;
+}
+
+/* ── PAGE TABS ──────────────────────────────────────────────── */
+
+.mg-page-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  gap: 0;
+}
+
+.mg-page-tab {
+  padding: 0 20px;
+  height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--soft);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  letter-spacing: .01em;
+  transition: color .15s, border-color .15s;
+}
+
+.mg-page-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--green);
+}
+
+/* ── MARKET LIST ────────────────────────────────────────────── */
+
+.mg-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ── MARKET ROW (replaces stacked card) ─────────────────────── */
+
+.market-card {
+  background: var(--panel);
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  position: relative;
+}
+
+.market-card:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.market-card:last-child  { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+
+/* remove old glow — not Curvance's style */
+.card-glow,
+.card-glow--blue { display: none; }
+
+/* ── PAIR HEADER ────────────────────────────────────────────── */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 0;
+  margin-bottom: 0;
+}
+
+.asset-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.token-stack {
+  position: relative;
+  width: 40px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.token-main {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 2px solid var(--panel);
+}
+
+.token-secondary {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--panel);
+  object-fit: cover;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+}
+
+.eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--soft);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.asset-info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--text);
+  margin-top: 0;
+}
+
+.asset-info p {
+  font-size: 11px;
+  color: var(--soft);
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+/* APR pill — top right */
+.apr-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.apr-pill span:first-child {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'Geist Mono', monospace;
+  color: var(--green);
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+
+.apr-pill span:last-child {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--soft);
+  text-transform: uppercase;
+}
+
+.apr-pill--supply span:first-child {
+  color: var(--accent-hover);
+}
+
+/* ── INLINE STATS (replaces stat grid) ──────────────────────── */
+
+.market-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  margin: 0;
+  padding: 12px 16px 0;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+}
+
+.stat:last-child { border-bottom: none; }
+
+.stat span {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 0;
+}
+
+.stat strong {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+/* ── FLOW ROW (collateral → loan) ───────────────────────────── */
+
+.flow-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid var(--border);
+  background: var(--panel-2);
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+.flow-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-token {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.flow-side span {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin-bottom: 2px;
+}
+
+.flow-side strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.flow-arrow {
+  font-size: 14px;
+  color: var(--soft);
+  flex-shrink: 0;
+}
+
+.earn-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.earn-badge span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin-bottom: 2px;
+}
+
+.earn-badge strong {
+  font-size: 16px;
+  font-weight: 800;
+  font-family: 'Geist Mono', monospace;
+  color: var(--accent-hover);
+  letter-spacing: -.02em;
+}
+
+/* ── RISK BAR ───────────────────────────────────────────────── */
+
+.risk-bar-wrap {
+  padding: 10px 16px 0;
+}
+
+.risk-bar-track {
+  height: 4px;
+  background: var(--panel-3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green), #F0C040, var(--red));
+  transition: width .4s ease;
+}
+
+.risk-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.risk-bar-labels strong {
+  color: var(--text);
+  font-family: 'Geist Mono', monospace;
+  text-transform: none;
+  letter-spacing: -.01em;
+}
+
+/* ── CARD TABS ──────────────────────────────────────────────── */
+
+.card-tabs {
+  display: flex;
+  margin: 12px 16px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 0;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.card-tab {
+  padding: 0 16px;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--soft);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: .01em;
+  transition: color .15s, border-color .15s;
+}
+
+.card-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--green);
+}
+
+/* ── CARD PANELS ────────────────────────────────────────────── */
+
+.card-panel { display: none; }
+.card-panel.active {
+  display: block;
+  padding: 14px 16px 16px;
+}
+
+/* ── BALANCE ROW ────────────────────────────────────────────── */
+
+.card-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.card-balance-row span:last-child {
+  color: var(--text);
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+}
+
+/* ── INPUT ──────────────────────────────────────────────────── */
+
+.card-input-box {
+  display: flex;
+  align-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 44px;
+  margin-bottom: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.card-input-box:focus-within {
+  border-color: rgba(22, 199, 132, .4);
+  box-shadow: 0 0 0 3px rgba(22, 199, 132, .08);
+}
+
+.card-input {
+  flex: 1;
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  color: var(--text);
+  outline: none;
+  letter-spacing: -.01em;
+}
+
+.card-input::placeholder {
+  color: var(--soft);
+  font-weight: 400;
+}
+
+.card-input-unit {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .04em;
+  flex-shrink: 0;
+}
+
+/* ── POSITION PREVIEW ───────────────────────────────────────── */
+
+.position-preview {
+  border-top: 1px solid var(--border);
+  padding-top: 0;
+  margin-bottom: 14px;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-row:last-child { border-bottom: none; }
+
+.preview-row span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.preview-row strong {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.green { color: var(--green) !important; }
+
+/* ── ACTION BUTTON ──────────────────────────────────────────── */
+
+.borrow-btn {
+  width: 100%;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  background: #d8f8d8;
+  color: #0a0a0a;
+  border: none;
+  cursor: pointer;
+  letter-spacing: .01em;
+  transition: opacity .15s, transform .12s, filter .15s;
+  margin-top: 4px;
+}
+
+.borrow-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.borrow-btn:active {
+  transform: translateY(0);
+  opacity: .9;
+}
+
+.borrow-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none;
+}
