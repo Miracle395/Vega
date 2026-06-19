@@ -92,7 +92,7 @@ async function _loadPythModules() {
 async function _freshenPythPrices(tx, suiClient) {
   const { SuiPriceServiceConnection, SuiPythClient } = await _loadPythModules();
 
-  const connection = new SuiPriceServiceConnection('https://hermes.pyth.network');
+  const connection = new SuiPriceServiceConnection('https://hermes-beta.pyth.network');
   const feedIds = [MARGIN_EXEC_CFG.SUI_FEED_ID, MARGIN_EXEC_CFG.DBUSDC_FEED_ID];
   const updateData = await connection.getPriceFeedsUpdateData(feedIds);
 
