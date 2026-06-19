@@ -8,7 +8,7 @@ Live app: [vegaxyz.vercel.app](https://vegaxyz.vercel.app)
 Landing: [vegaxyz.vercel.app/home](https://vegaxyz.vercel.app/home)
 
 Repo: [github.com/Miracle395/Vega](https://github.com/Miracle395/Vega)
-Demo video: *coming soon*
+Demo video: https://youtu.be/OhdlT9Z9Z28?si=IwkLKCx8PhjwRpgO
 
 ---
 
