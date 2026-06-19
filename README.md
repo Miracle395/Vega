@@ -1,6 +1,6 @@
 # Vega
 
-**Trade with an execution edge.**
+**Vega is where you trade with an execution edge.**
 
 Vega is a mobile-first trading terminal for Sui — built entirely on **DeepBook V3**. It unifies spot execution and margin (borrow, supply, earn) in a single interface, so traders can route, leverage, and earn yield without leaving the app or touching a second protocol.
 
